@@ -20,10 +20,7 @@ import java.util.Properties;
 
 import org.mybatis.generator.api.PluginAdapter;
 import org.mybatis.generator.api.IntrospectedTable;
-import org.mybatis.generator.api.dom.java.Field;
-import org.mybatis.generator.api.dom.java.FullyQualifiedJavaType;
-import org.mybatis.generator.api.dom.java.JavaVisibility;
-import org.mybatis.generator.api.dom.java.TopLevelClass;
+import org.mybatis.generator.api.dom.java.*;
 
 /**
  * This plugin adds the java.io.Serializable marker interface to all generated
@@ -83,6 +80,33 @@ public class SerializablePlugin extends PluginAdapter {
         makeSerializable(topLevelClass, introspectedTable);
         return true;
     }
+
+    /**
+     * 添加给Example类序列化的方法
+     * @param topLevelClass
+     * @param introspectedTable
+     * @return
+     */
+    @Override
+    public boolean modelExampleClassGenerated(TopLevelClass topLevelClass,IntrospectedTable introspectedTable){
+        makeSerializable(topLevelClass, introspectedTable);
+
+        for (InnerClass innerClass : topLevelClass.getInnerClasses()) {
+            if ("GeneratedCriteria".equals(innerClass.getType().getShortName())) { //$NON-NLS-1$
+                innerClass.addSuperInterface(serializable);
+            }
+            if ("Criteria".equals(innerClass.getType().getShortName())) { //$NON-NLS-1$
+                innerClass.addSuperInterface(serializable);
+            }
+            if ("Criterion".equals(innerClass.getType().getShortName())) { //$NON-NLS-1$
+                innerClass.addSuperInterface(serializable);
+            }
+        }
+
+        return true;
+    }
+
+
 
     protected void makeSerializable(TopLevelClass topLevelClass,
             IntrospectedTable introspectedTable) {
